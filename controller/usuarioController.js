@@ -22,11 +22,9 @@ rutas.get('/usuario/:alias', async (req, res) => {
   try {
     const connection = await establecerConexion();
     const alias = req.params.alias;
-    console.log(alias);
-    const result = await connection.execute('SELECT * FROM usuario where alias = :alias', { alias });
+    const result = await connection.execute('SELECT * FROM usuario u inner join descuento d on u.id_descuento = d.id where alias = :alias', { alias });
     const rows = result.rows;
     res.json(rows);
-    console.log(rows)
   } catch (error) {
     console.error('Error al ejecutar la consulta:', error);
     res.status(500).json({ error: 'Error al ejecutar la consulta' });
@@ -37,12 +35,12 @@ rutas.get('/usuario/:alias', async (req, res) => {
 rutas.post('/usuario', async (req, res) => {
   try {
     const connection = await establecerConexion();
-    const { nombre, alias, contrasena } = req.body;
+    const { nombre, alias, contrasena, id_descuento } = req.body;
     await connection.execute(
       `BEGIN
-              insertar_usuario(:nombre, :alias, :contrasena);
+              insertar_usuario(:nombre, :alias, :contrasena, :id_descuento);
           END;`,
-      { nombre, alias, contrasena }
+      { nombre, alias, contrasena, id_descuento }
     );
     console.log(req.body)
     res.json({ mensaje: 'Usuario insertado correctamente' });
